@@ -64,7 +64,9 @@
                     <td>{{ $article->content }}</td>
                     <td>
                         @if($article->image)
-                            <img src="{{ asset('storage/' . $article->image) }}" alt="Image" width="100">
+                            <img src="{{ asset('img/' . $article->image) }}" alt="Image" width="100">
+                            @else
+                            <img src="{{ asset('img/banjir3.jpeg') }}" alt="No Image" width="100">
                         @endif
                     </td>
                     <td>{{ $article->author }}</td>

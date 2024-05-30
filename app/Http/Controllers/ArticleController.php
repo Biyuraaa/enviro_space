@@ -9,6 +9,8 @@ use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ArticleController extends Controller
 {
@@ -37,20 +39,20 @@ class ArticleController extends Controller
     {
         $validatedData = $request->validated();
 
-        $image = $request->file('image');
         if ($request->hasFile('image')) {
-            $filename = Str::slug($request->content) . '.' . $image->getClientOriginalExtension();
-            $image->storeAs('public/img', $filename);
+            $file = $request->file('image');
+            $filename = $request->title . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('img/'), $filename);
+
+            // Update $validatedData with the image filename
             $validatedData['image'] = $filename;
         }
 
         Article::create($validatedData);
 
-
-
         return redirect()->route('dashboard');
-        //
     }
+
 
     /**
      * Display the specified resource.
@@ -76,45 +78,45 @@ class ArticleController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(UpdateArticleRequest $request, Article $article)
     {
         $validatedData = $request->validated();
 
-        if ($request->hasFile('image') || $validatedData['title'] != $article->title) {
-            $image = $request->hasFile('image') ? $request->file('image') : $article->image;
-            $filename = Str::slug($validatedData['title']) . '.' . pathinfo($image, PATHINFO_EXTENSION);
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = $request->title . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('img/'), $filename);
 
-            // Delete old image
-            if ($article->image) {
-                Storage::delete('public/img/' . $article->image);
-            }
-
-            // Store new image
-            if ($request->hasFile('image')) {
-                $image->storeAs('public/img', $filename);
-            } else {
-                Storage::move('public/img/' . $article->image, 'public/img/' . $filename);
-            }
-
+            // Update $validatedData with the image filename
             $validatedData['image'] = $filename;
         }
 
         $article->update($validatedData);
 
-        return redirect()->route('dashboard')->with('status', 'Article updated successfully!');
+        return redirect()->route('dashboard');
     }
+
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Article $article)
     {
-        if ($article->image) {
-            Storage::delete('public/img/' . $article->image);
+        DB::beginTransaction();
+        try {
+            if ($article->image && file_exists(public_path('assets/images/' . $article->image))) {
+                unlink(public_path('img/' . $article->image));
+            }
+            $article->delete();
+            DB::commit();
+
+            return redirect()->route('dashboard');
+        } catch (\Exception $e) {
+            DB::rollback();
+            // handle the exception here, maybe return with an error message
         }
-
-        $article->delete();
-
-        return redirect()->route('dashboard')->with('status', 'Article deleted successfully!');
     }
 }
