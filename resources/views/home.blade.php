@@ -1,5 +1,5 @@
 @extends('layouts.main')
-@section('home')
+@section('content')
     
 <!-- Hero Section Start -->
 <section class="Hero" id="home">
@@ -18,8 +18,6 @@
 </section>
 
 <!-- Hero Section End -->
-
-<!-- About section start -->
 <section id="about" class="about">
     <h2><span>Tentang</span> Kami</h2>
     
@@ -41,6 +39,8 @@
         </div>
     </div>
 </section>
+<!-- About section start -->
+
 
 <!-- About section end -->
 
@@ -54,8 +54,8 @@
     
     <div class="row">
         <div class="Koleksi-card">
-            <a href="/topik">
-                <img src="/img/Koleksi/1.jpg" alt="Ekosistem" class="Koleksi-card-img" />
+            <a href="{{route('articles.index')}}">
+                <img src="{{asset('img/Koleksi/1.jpg')}}" alt="Ekosistem" class="Koleksi-card-img" />
                 <h3 class="Koleksi-card-title">- Ekosistem -</h3>
                 <p class="Koleksi-card-jumlah">TOTAL 989 KOLEKSI</p>
             </a>
